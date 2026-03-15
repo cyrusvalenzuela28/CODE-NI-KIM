@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Midway Barbershop | Premium Booking System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a1a1a;
+            --accent-gold: #c9a962;
+            --accent-red: #c41e3a;
+            --accent-blue: #2c5f7c;
+            --light: #f5f5f0;
+            --dark: #0f0f0f;
+            --success: #2d5016;
+            --warning: #b8860b;
+            --danger: #8b0000;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark);
+            min-height: 100vh;
+            color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(201, 169, 98, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(44, 95, 124, 0.05) 0%, transparent 50%),
+                repeating-linear-gradient(45deg, rgba(201, 169, 98, 0.02) 0px, rgba(201, 169, 98, 0.02) 1px, transparent 1px, transparent 11px),
+                repeating-linear-gradient(-45deg, rgba(201, 169, 98, 0.02) 0px, rgba(201, 169, 98, 0.02) 1px, transparent 1px, transparent 11px);
+            z-index: -1;
+        }
+
+        .barber-pole {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 8px;
+            height: 100%;
+            background: repeating-linear-gradient(
+                45deg,
+                var(--accent-red) 0 20px,
+                white 20px 40px,
+                var(--accent-blue) 40px 60px
+            );
+            background-size: 200% 200%;
+            animation: poleScroll 20s linear infinite;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+        }
+
+        @keyframes poleScroll {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 0% 200%; }
+        }
+
+        /* Login Screen */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .login-box {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(201, 169, 98, 0.2);
+            border-radius: 20px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+
+        .login-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--accent-gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .login-subtitle {
+            color: #888;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .role-btn {
+            padding: 1.5rem;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid rgba(201, 169, 98, 0.2);
+            border-radius: 12px;
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .role-btn:hover {
+            border-color: var(--accent-gold);
+            transform: translateY(-2px);
+        }
+
+        .role-btn.active {
+            background: rgba(201, 169, 98, 0.1);
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .role-btn i {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .pin-input {
+            display: none;
+            margin-top: 1.5rem;
+        }
+
+        .pin-input.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .pin-dots {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .pin-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: rgba(201, 169, 98, 0.2);
+            border: 2px solid rgba(201, 169, 98, 0.3);
+            transition: all 0.2s;
+        }
+
+        .pin-dot.filled {
+            background: var(--accent-gold);
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 10px rgba(201, 169, 98, 0.5);
+        }
+
+        .numpad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            max-width: 280px;
+            margin: 0 auto;
+        }
+
+        .num-btn {
+            aspect-ratio: 1;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(201, 169, 98, 0.2);
+            border-radius: 12px;
+            color: var(--light);
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .num-btn:hover {
+            background: rgba(201, 169, 98, 0.1);
+            border-color: var(--accent-gold);
+        }
+
+        .num-btn.delete {
+            background: rgba(196, 30, 58, 0.1);
+            border-color: rgba(196, 30, 58, 0.3);
+            color: var(--accent-red);
+        }
+
+        /* Main Layout */
+        .app-container {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .app-container.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--dark) 100%);
+            padding: 1.5rem 0;
+            border-bottom: 3px solid var(--accent-gold);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .user-badge {
+            background: rgba(201, 169, 98, 0.1);
+            border: 1px solid rgba(201, 169, 98, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--accent-gold);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #888;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn:hover {
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(201, 169, 98, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(201, 169, 98, 0.1);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(201, 169, 98, 0.2);
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-gold);
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(201, 169, 98, 0.2);
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: var(--light);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.1);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-gold), #b8941f);
+            color: var(--dark);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(201, 169, 98, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--accent-red), #8b0000);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2d5016, #1a3009);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning), #8b6914);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: var(--light);
+            border: 1px solid rgba(201, 169, 98, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(201, 169, 98, 0.1);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(201, 169, 98, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-gold), var(--accent-red), var(--accent-blue));
+        }
+
+        .stat-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--accent-gold);
+            font-weight: 700;
+        }
+
+        .stat-label {
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Lists */
+        .item-list {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .item-card {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(201, 169, 98, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .item-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--accent-gold);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .item-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .item-card:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: translateX(5px);
+        }
+
+        .item-info h4 {
+            color: var(--accent-gold);
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .item-info p {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .price-tag {
+            background: rgba(201, 169, 98, 0.1);
+            color: var(--accent-gold);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 1px solid rgba(201, 169, 98, 0.3);
+        }
+
+        /* Booking Cards */
+        .booking-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .booking-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .booking-card.pending { border-left: 4px solid var(--warning); }
+        .booking-card.approved { border-left: 4px solid var(--success); }
+        .booking-card.rejected { border-left: 4px solid var(--danger); }
+
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .client-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            color: var(--light);
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-badge.pending { background: rgba(184, 134, 11, 0.2); color: #ffd700; border: 1px solid var(--warning); }
+        .status-badge.approved { background: rgba(45, 80, 22, 0.2); color: #90ee90; border: 1px solid var(--success); }
+        .status-badge.rejected { background: rgba(139, 0, 0, 0.2); color: #ff6b6b; border: 1px solid var(--danger); }
+
+        .booking-details {
+            display: grid;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            color: #aaa;
+            font-size: 0.95rem;
+        }
+
+        .booking-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .booking-actions button {
+            flex: 1;
+            padding: 8px;
+            font-size: 0.8rem;
+        }
+
+        /* Filter */
+        .filter-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(201, 169, 98, 0.2);
+            color: #888;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn.active, .filter-btn:hover {
+            background: rgba(201, 169, 98, 0.1);
+            color: var(--accent-gold);
+            border-color: var(--accent-gold);
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding-left: 40px;
+        }
+
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.5;
+        }
+
+        /* Customer View Specific */
+        .hero-section {
+            text-align: center;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+        }
+
+        .hero-subtitle {
+            color: #888;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .services-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .service-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(201, 169, 98, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-gold), var(--accent-red));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .service-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(201, 169, 98, 0.3);
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .service-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .service-price {
+            font-size: 2rem;
+            color: var(--light);
+            font-weight: 700;
+            margin: 1rem 0;
+        }
+
+        .service-duration {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .booking-form-large {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* My Bookings Section */
+        .my-bookings {
+            margin-top: 3rem;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(201, 169, 98, 0.95);
+            color: var(--dark);
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 10000;
+            font-weight: 600;
+        }
+
+        .toast.show { transform: translateX(0); }
+        .toast.error { background: rgba(196, 30, 58, 0.95); color: white; }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in { animation: fadeIn 0.5s ease forwards; }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .role-selector { grid-template-columns: 1fr; }
+            .header-content { flex-direction: column; gap: 1rem; }
+            .booking-grid { grid-template-columns: 1fr; }
+            .hero-title { font-size: 2rem; }
+        }
+
+        /* Hidden utility */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="barber-pole"></div>
+    <div class="bg-pattern"></div>
+
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-box animate-in">
+            <div class="login-logo">Midway Barbershop</div>
+            <div class="login-subtitle">Select your portal to continue</div>
+            
+            <div class="role-selector">
+                <button class="role-btn" onclick="selectRole('customer')">
+                    <span style="font-size: 2rem;">👤</span>
+                    <div>Customer</div>
+                    <small style="opacity: 0.7; font-size: 0.8rem;">Book Appointment</small>
+                </button>
+                <button class="role-btn" onclick="selectRole('admin')">
+                    <span style="font-size: 2rem;">🔒</span>
+                    <div>Admin</div>
+                    <small style="opacity: 0.7; font-size: 0.8rem;">Manage System</small>
+                </button>
+            </div>
+
+            <div id="pinSection" class="pin-input">
+                <div style="color: #888; margin-bottom: 1rem; font-size: 0.9rem;">Enter Admin PIN</div>
+                <div class="pin-dots">
+                    <div class="pin-dot" id="dot1"></div>
+                    <div class="pin-dot" id="dot2"></div>
+                    <div class="pin-dot" id="dot3"></div>
+                    <div class="pin-dot" id="dot4"></div>
+                </div>
+                <div class="numpad">
+                    <button class="num-btn" onclick="enterNum(1)">1</button>
+                    <button class="num-btn" onclick="enterNum(2)">2</button>
+                    <button class="num-btn" onclick="enterNum(3)">3</button>
+                    <button class="num-btn" onclick="enterNum(4)">4</button>
+                    <button class="num-btn" onclick="enterNum(5)">5</button>
+                    <button class="num-btn" onclick="enterNum(6)">6</button>
+                    <button class="num-btn" onclick="enterNum(7)">7</button>
+                    <button class="num-btn" onclick="enterNum(8)">8</button>
+                    <button class="num-btn" onclick="enterNum(9)">9</button>
+                    <button class="num-btn" onclick="clearPin()" style="font-size: 0.9rem;">CLR</button>
+                    <button class="num-btn" onclick="enterNum(0)">0</button>
+                    <button class="num-btn delete" onclick="deleteNum()">⌫</button>
+                </div>
+            </div>
+
+            <button id="enterBtn" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem; display: none;" onclick="enterPortal()">
+                Enter Portal
+            </button>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="adminPanel" class="app-container">
+        <header>
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">Midway Admin</div>
+                    <span class="user-badge">🔒 Administrator</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Stats -->
+            <div class="stats-grid animate-in">
+                <div class="stat-card">
+                    <div class="stat-number" id="adminStatTotal">0</div>
+                    <div class="stat-label">Total Bookings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="adminStatApproved">0</div>
+                    <div class="stat-label">Approved</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="adminStatPending">0</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="adminStatRevenue">₱0</div>
+                    <div class="stat-label">Revenue</div>
+                </div>
+            </div>
+
+            <!-- Services Management -->
+            <div class="glass-card animate-in">
+                <h2 class="section-title">💈 Manage Services</h2>
+                <form id="adminServiceForm" class="form-grid">
+                    <div class="form-group">
+                        <label>Service Name</label>
+                        <input type="text" id="adminServiceName" placeholder="e.g., Classic Haircut" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Price (₱)</label>
+                        <input type="number" id="adminServicePrice" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Duration (min)</label>
+                        <input type="number" id="adminServiceDuration" placeholder="30" required>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: end;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Add Service</button>
+                    </div>
+                </form>
+                <div id="adminServiceList" class="item-list"></div>
+            </div>
+
+            <!-- Barbers Management -->
+            <div class="glass-card animate-in">
+                <h2 class="section-title">👨‍💼 Manage Barbers</h2>
+                <form id="adminBarberForm" class="form-grid">
+                    <div class="form-group">
+                        <label>Barber Name</label>
+                        <input type="text" id="adminBarberName" placeholder="e.g., John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Off Days (Hold Ctrl/Cmd)</label>
+                        <select id="adminBarberOff" multiple style="height: 100px;">
+                            <option value="Sunday">Sunday</option>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: end;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Add Barber</button>
+                    </div>
+                </form>
+                <div id="adminBarberList" class="item-list"></div>
+            </div>
+
+            <!-- All Bookings -->
+            <div class="glass-card animate-in">
+                <h2 class="section-title">📋 All Bookings</h2>
+                <div class="filter-container">
+                    <div class="search-box">
+                        <input type="text" id="adminSearch" placeholder="Search by client name..." oninput="renderAdminBookings()">
+                    </div>
+                    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+                    <button class="filter-btn" onclick="setFilter('pending', this)">Pending</button>
+                    <button class="filter-btn" onclick="setFilter('approved', this)">Approved</button>
+                    <button class="filter-btn" onclick="setFilter('rejected', this)">Rejected</button>
+                </div>
+                <div id="adminBookingList" class="booking-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOMER PANEL -->
+    <div id="customerPanel" class="app-container">
+        <header>
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">Midway Barbershop</div>
+                    <span class="user-badge">👤 Customer Portal</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Hero -->
+            <div class="hero-section animate-in">
+                <h1 class="hero-title">Premium Grooming Experience</h1>
+                <p class="hero-subtitle">Book your appointment with our master barbers and experience the art of traditional grooming.</p>
+            </div>
+
+            <!-- Available Services -->
+            <div class="glass-card animate-in">
+                <h2 class="section-title">Our Services</h2>
+                <div id="customerServices" class="services-showcase"></div>
+            </div>
+
+            <!-- Booking Form -->
+            <div class="glass-card animate-in">
+                <h2 class="section-title">Book Your Appointment</h2>
+                <form id="customerBookingForm" class="booking-form-large">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Your Name</label>
+                            <input type="text" id="custName" placeholder="Full Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Select Service</label>
+                            <select id="custService" required>
+                                <option value="">Choose a service...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Preferred Barber</label>
+                            <select id="custBarber" required>
+                                <option value="">Choose a barber...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="custDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Time</label>
+                            <input type="time" id="custTime" required>
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: end;">
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Book Now</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- My Bookings -->
+            <div class="glass-card animate-in my-bookings">
+                <h2 class="section-title">My Bookings</h2>
+                <div id="myBookingsList" class="booking-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Data Management
+        let services = JSON.parse(localStorage.getItem("midway_services")) || [];
+        let barbers = JSON.parse(localStorage.getItem("midway_barbers")) || [];
+        let bookings = JSON.parse(localStorage.getItem("midway_bookings")) || [];
+        
+        let currentRole = null;
+        let currentFilter = 'all';
+        let pin = '';
+        const ADMIN_PIN = '1234';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('custDate').min = today;
+        });
+
+        // Login Functions
+        function selectRole(role) {
+            currentRole = role;
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            const pinSection = document.getElementById('pinSection');
+            const enterBtn = document.getElementById('enterBtn');
+            
+            if (role === 'admin') {
+                pinSection.classList.add('show');
+                enterBtn.style.display = 'none';
+                pin = '';
+                updatePinDots();
+            } else {
+                pinSection.classList.remove('show');
+                enterBtn.style.display = 'block';
+            }
+        }
+
+        function enterNum(num) {
+            if (pin.length < 4) {
+                pin += num;
+                updatePinDots();
+                if (pin.length === 4) {
+                    setTimeout(checkPin, 200);
+                }
+            }
+        }
+
+        function deleteNum() {
+            pin = pin.slice(0, -1);
+            updatePinDots();
+        }
+
+        function clearPin() {
+            pin = '';
+            updatePinDots();
+        }
+
+        function updatePinDots() {
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`dot${i}`).classList.toggle('filled', i <= pin.length);
+            }
+        }
+
+        function checkPin() {
+            if (pin === ADMIN_PIN) {
+                enterPortal();
+            } else {
+                showToast('Incorrect PIN', 'error');
+                pin = '';
+                updatePinDots();
+            }
+        }
+
+        function enterPortal() {
+            document.getElementById('loginScreen').style.display = 'none';
+            if (currentRole === 'admin') {
+                document.getElementById('adminPanel').classList.add('active');
+                initAdminPanel();
+            } else {
+                document.getElementById('customerPanel').classList.add('active');
+                initCustomerPanel();
+            }
+        }
+
+        function logout() {
+            currentRole = null;
+            pin = '';
+            document.querySelectorAll('.app-container').forEach(el => el.classList.remove('active'));
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('pinSection').classList.remove('show');
+            document.getElementById('enterBtn').style.display = 'none';
+        }
+
+        // Toast
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show ' + type;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Save Data
+        function saveData() {
+            localStorage.setItem("midway_services", JSON.stringify(services));
+            localStorage.setItem("midway_barbers", JSON.stringify(barbers));
+            localStorage.setItem("midway_bookings", JSON.stringify(bookings));
+        }
+
+        // ADMIN PANEL FUNCTIONS
+        function initAdminPanel() {
+            renderAdminServices();
+            renderAdminBarbers();
+            renderAdminBookings();
+            updateAdminStats();
+            
+            document.getElementById('adminServiceForm').onsubmit = (e) => {
+                e.preventDefault();
+                services.push({
+                    name: document.getElementById('adminServiceName').value,
+                    price: document.getElementById('adminServicePrice').value,
+                    duration: document.getElementById('adminServiceDuration').value
+                });
+                saveData();
+                renderAdminServices();
+                e.target.reset();
+                showToast('Service added');
+            };
+
+            document.getElementById('adminBarberForm').onsubmit = (e) => {
+                e.preventDefault();
+                const offDays = Array.from(document.getElementById('adminBarberOff').selectedOptions).map(o => o.value);
+                barbers.push({
+                    name: document.getElementById('adminBarberName').value,
+                    off: offDays
+                });
+                saveData();
+                renderAdminBarbers();
+                e.target.reset();
+                showToast('Barber added');
+            };
+        }
+
+        function updateAdminStats() {
+            document.getElementById('adminStatTotal').textContent = bookings.length;
+            document.getElementById('adminStatApproved').textContent = bookings.filter(b => b.status === 'Approved').length;
+            document.getElementById('adminStatPending').textContent = bookings.filter(b => b.status === 'Pending').length;
+            const revenue = bookings.filter(b => b.status === 'Approved').reduce((sum, b) => {
+                const s = services.find(sv => sv.name === b.service);
+                return sum + (s ? parseFloat(s.price) : 0);
+            }, 0);
+            document.getElementById('adminStatRevenue').textContent = '₱' + revenue.toLocaleString();
+        }
+
+        function renderAdminServices() {
+            const container = document.getElementById('adminServiceList');
+            if (!services.length) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✂</div><p>No services added</p></div>';
+                return;
+            }
+            container.innerHTML = services.map((s, i) => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>${s.name}</h4>
+                        <p>${s.duration} minutes</p>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <span class="price-tag">₱${parseFloat(s.price).toLocaleString()}</span>
+                        <button class="btn btn-danger" onclick="deleteService(${i})" style="padding: 6px 12px; font-size: 0.8rem;">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAdminBarbers() {
+            const container = document.getElementById('adminBarberList');
+            if (!barbers.length) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💈</div><p>No barbers added</p></div>';
+                return;
+            }
+            container.innerHTML = barbers.map((b, i) => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>${b.name}</h4>
+                        <p>Off: ${b.off.join(', ') || 'None'}</p>
+                    </div>
+                    <button class="btn btn-danger" onclick="deleteBarber(${i})" style="padding: 6px 12px; font-size: 0.8rem;">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        function renderAdminBookings() {
+            const container = document.getElementById('adminBookingList');
+            const search = document.getElementById('adminSearch').value.toLowerCase();
+            
+            let filtered = bookings.filter(b => {
+                if (currentFilter !== 'all' && b.status.toLowerCase() !== currentFilter) return false;
+                if (search && !b.clientName.toLowerCase().includes(search)) return false;
+                return true;
+            });
+
+            if (!filtered.length) {
+                container.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">📅</div><p>No bookings found</p></div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map((b, idx) => {
+                const originalIdx = bookings.indexOf(b);
+                const service = services.find(s => s.name === b.service);
+                return `
+                <div class="booking-card ${b.status.toLowerCase()}">
+                    <div class="booking-header">
+                        <div>
+                            <div class="client-name">${b.clientName}</div>
+                            <div style="color: #666; font-size: 0.9rem;">${b.service}</div>
+                        </div>
+                        <span class="status-badge ${b.status.toLowerCase()}">${b.status}</span>
+                    </div>
+                    <div class="booking-details">
+                        <span>💈 ${b.barber}</span>
+                        <span>📅 ${new Date(b.date).toLocaleDateString()}</span>
+                        <span>🕐 ${b.time}</span>
+                        ${service ? `<span style="color: var(--accent-gold);">💰 ₱${parseFloat(service.price).toLocaleString()}</span>` : ''}
+                    </div>
+                    <div class="booking-actions">
+                        ${b.status !== 'Approved' ? `<button class="btn btn-success" onclick="updateStatus(${originalIdx}, 'Approved')">Approve</button>` : ''}
+                        ${b.status !== 'Rejected' ? `<button class="btn btn-warning" onclick="updateStatus(${originalIdx}, 'Rejected')">Reject</button>` : ''}
+                        <button class="btn btn-secondary" onclick="deleteBooking(${originalIdx})">Delete</button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function setFilter(status, btn) {
+            currentFilter = status;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderAdminBookings();
+        }
+
+        function deleteService(i) {
+            if (confirm('Delete this service?')) {
+                services.splice(i, 1);
+                saveData();
+                renderAdminServices();
+                showToast('Service deleted');
+            }
+        }
+
+        function deleteBarber(i) {
+            if (confirm('Delete this barber?')) {
+                barbers.splice(i, 1);
+                saveData();
+                renderAdminBarbers();
+                showToast('Barber deleted');
+            }
+        }
+
+        function updateStatus(i, status) {
+            bookings[i].status = status;
+            saveData();
+            renderAdminBookings();
+            updateAdminStats();
+            showToast(`Booking ${status.toLowerCase()}`);
+        }
+
+        function deleteBooking(i) {
+            if (confirm('Delete this booking permanently?')) {
+                bookings.splice(i, 1);
+                saveData();
+                renderAdminBookings();
+                updateAdminStats();
+                showToast('Booking deleted');
+            }
+        }
+
+        // CUSTOMER PANEL FUNCTIONS
+        function initCustomerPanel() {
+            renderCustomerServices();
+            updateCustomerSelects();
+            renderMyBookings();
+
+            // Barber change handler for date validation
+            document.getElementById('custBarber').addEventListener('change', function() {
+                const barberName = this.value;
+                const barberObj = barbers.find(b => b.name === barberName);
+                
+                document.getElementById('custDate').addEventListener('change', function() {
+                    if (!barberObj) return;
+                    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                    const selectedDay = days[new Date(this.value).getDay()];
+                    if (barberObj.off.includes(selectedDay)) {
+                        showToast(`${barberName} is off on ${selectedDay}`, 'error');
+                        this.value = "";
+                    }
+                });
+            });
+
+            document.getElementById('customerBookingForm').onsubmit = (e) => {
+                e.preventDefault();
+                const name = document.getElementById('custName').value;
+                const service = document.getElementById('custService').value;
+                const barber = document.getElementById('custBarber').value;
+                const date = document.getElementById('custDate').value;
+                const time = document.getElementById('custTime').value;
+
+                const barberObj = barbers.find(b => b.name === barber);
+                const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                const selectedDay = days[new Date(date).getDay()];
+
+                if (barberObj.off.includes(selectedDay)) {
+                    showToast(`${barber} is off on ${selectedDay}`, 'error');
+                    return;
+                }
+
+                const conflict = bookings.some(b => 
+                    b.barber === barber && b.date === date && b.time === time && b.status !== 'Rejected'
+                );
+
+                if (conflict) {
+                    showToast('This barber is already booked at this time', 'error');
+                    return;
+                }
+
+                bookings.push({
+                    clientName: name,
+                    service,
+                    barber,
+                    date,
+                    time,
+                    status: 'Pending',
+                    createdAt: new Date().toISOString()
+                });
+
+                saveData();
+                renderMyBookings();
+                updateAdminStats();
+                e.target.reset();
+                showToast('Booking submitted successfully!');
+            };
+        }
+
+        function renderCustomerServices() {
+            const container = document.getElementById('customerServices');
+            if (!services.length) {
+                container.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><p>No services available</p></div>';
+                return;
+            }
+            container.innerHTML = services.map(s => `
+                <div class="service-card">
+                    <div class="service-icon">✂</div>
+                    <div class="service-name">${s.name}</div>
+                    <div class="service-duration">${s.duration} minutes</div>
+                    <div class="service-price">₱${parseFloat(s.price).toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+
+        function updateCustomerSelects() {
+            const serviceSelect = document.getElementById('custService');
+            const barberSelect = document.getElementById('custBarber');
+            
+            serviceSelect.innerHTML = '<option value="">Choose a service...</option>' + 
+                services.map(s => `<option value="${s.name}">${s.name} - ₱${parseFloat(s.price).toLocaleString()}</option>`).join('');
+            
+            barberSelect.innerHTML = '<option value="">Choose a barber...</option>' + 
+                barbers.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
+        }
+
+        function renderMyBookings() {
+            const container = document.getElementById('myBookingsList');
+            const customerName = document.getElementById('custName').value.toLowerCase();
+            
+            // Get bookings for current session (by name match) or show recent
+            let myBookings = bookings.filter(b => 
+                b.clientName.toLowerCase() === customerName || 
+                !customerName
+            ).slice(-6).reverse(); // Show last 6
+
+            if (!myBookings.length) {
+                container.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">📅</div><p>No bookings yet. Make your first appointment!</p></div>';
+                return;
+            }
+
+            container.innerHTML = myBookings.map(b => {
+                const service = services.find(s => s.name === b.service);
+                return `
+                <div class="booking-card ${b.status.toLowerCase()}">
+                    <div class="booking-header">
+                        <div>
+                            <div class="client-name">${b.service}</div>
+                            <div style="color: #666; font-size: 0.9rem;">with ${b.barber}</div>
+                        </div>
+                        <span class="status-badge ${b.status.toLowerCase()}">${b.status}</span>
+                    </div>
+                    <div class="booking-details">
+                        <span>📅 ${new Date(b.date).toLocaleDateString()}</span>
+                        <span>🕐 ${b.time}</span>
+                        ${service ? `<span style="color: var(--accent-gold);">💰 ₱${parseFloat(service.price).toLocaleString()}</span>` : ''}
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // Update my bookings when name changes
+        document.getElementById('custName')?.addEventListener('input', () => {
+            if (document.getElementById('customerPanel').classList.contains('active')) {
+                renderMyBookings();
+            }
+        });
+    </script>
+</body>
+</html>
