@@ -398,6 +398,11 @@
             background: rgba(201, 169, 98, 0.1);
         }
 
+        .btn-info {
+            background: linear-gradient(135deg, var(--accent-blue), #1e4a5f);
+            color: white;
+        }
+
         /* Stats Grid */
         .stats-grid {
             display: grid;
@@ -523,6 +528,7 @@
         .booking-card.pending { border-left: 4px solid var(--warning); }
         .booking-card.approved { border-left: 4px solid var(--success); }
         .booking-card.rejected { border-left: 4px solid var(--danger); }
+        .booking-card.completed { border-left: 4px solid var(--accent-blue); opacity: 0.8; }
 
         .booking-header {
             display: flex;
@@ -549,6 +555,7 @@
         .status-badge.pending { background: rgba(184, 134, 11, 0.2); color: #ffd700; border: 1px solid var(--warning); }
         .status-badge.approved { background: rgba(45, 80, 22, 0.2); color: #90ee90; border: 1px solid var(--success); }
         .status-badge.rejected { background: rgba(139, 0, 0, 0.2); color: #ff6b6b; border: 1px solid var(--danger); }
+        .status-badge.completed { background: rgba(44, 95, 124, 0.2); color: #87ceeb; border: 1px solid var(--accent-blue); }
 
         .booking-details {
             display: grid;
@@ -705,9 +712,64 @@
             margin: 0 auto;
         }
 
-        /* My Bookings Section */
-        .my-bookings {
+        /* Booking List Section */
+        .booking-list-section {
             margin-top: 3rem;
+        }
+
+        .booking-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .booking-list-item {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--accent-gold);
+            transition: all 0.3s ease;
+        }
+
+        .booking-list-item:hover {
+            transform: translateX(5px);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .booking-list-item.pending { border-left-color: var(--warning); }
+        .booking-list-item.approved { border-left-color: var(--success); }
+        .booking-list-item.rejected { border-left-color: var(--danger); }
+        .booking-list-item.completed { border-left-color: var(--accent-blue); opacity: 0.7; }
+
+        .booking-list-info {
+            flex: 1;
+        }
+
+        .booking-list-info h4 {
+            color: var(--accent-gold);
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .booking-list-info p {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .booking-list-meta {
+            text-align: right;
+        }
+
+        .booking-date {
+            color: var(--accent-gold);
+            font-weight: 600;
+            font-size: 0.9rem;
         }
 
         /* Toast */
@@ -756,6 +818,8 @@
             .header-content { flex-direction: column; gap: 1rem; }
             .booking-grid { grid-template-columns: 1fr; }
             .hero-title { font-size: 2rem; }
+            .booking-list-item { flex-direction: column; text-align: center; gap: 1rem; }
+            .booking-list-meta { text-align: center; }
         }
 
         /* Hidden utility */
@@ -843,8 +907,8 @@
                     <div class="stat-label">Pending</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="adminStatRevenue">₱0</div>
-                    <div class="stat-label">Revenue</div>
+                    <div class="stat-number" id="adminStatCompleted">0</div>
+                    <div class="stat-label">Completed</div>
                 </div>
             </div>
 
@@ -898,19 +962,28 @@
                 <div id="adminBarberList" class="item-list"></div>
             </div>
 
-            <!-- All Bookings -->
+            <!-- Active Bookings (Pending/Approved/Rejected) -->
             <div class="glass-card animate-in">
-                <h2 class="section-title">📋 All Bookings</h2>
+                <h2 class="section-title">📋 Active Bookings (Requires Action)</h2>
                 <div class="filter-container">
                     <div class="search-box">
                         <input type="text" id="adminSearch" placeholder="Search by client name..." oninput="renderAdminBookings()">
                     </div>
-                    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+                    <button class="filter-btn active" onclick="setFilter('all', this)">All Active</button>
                     <button class="filter-btn" onclick="setFilter('pending', this)">Pending</button>
                     <button class="filter-btn" onclick="setFilter('approved', this)">Approved</button>
                     <button class="filter-btn" onclick="setFilter('rejected', this)">Rejected</button>
                 </div>
                 <div id="adminBookingList" class="booking-grid"></div>
+            </div>
+
+            <!-- COMPLETE BOOKING LIST - Shows all bookings including completed -->
+            <div class="glass-card animate-in booking-list-section">
+                <div class="booking-list-header">
+                    <h2 class="section-title">📊 Complete Booking List</h2>
+                    <button class="filter-btn" onclick="setHistoryFilter('all')">Show All</button>
+                </div>
+                <div id="completeBookingList"></div>
             </div>
         </div>
     </div>
@@ -976,10 +1049,19 @@
                 </form>
             </div>
 
-            <!-- My Bookings -->
-            <div class="glass-card animate-in my-bookings">
-                <h2 class="section-title">My Bookings</h2>
-                <div id="myBookingsList" class="booking-grid"></div>
+            <!-- BOOKING LIST - Customer can see all their bookings -->
+            <div class="glass-card animate-in booking-list-section">
+                <h2 class="section-title">📋 My Booking List</h2>
+                <div class="filter-container">
+                    <div class="search-box" style="max-width: 300px;">
+                        <input type="text" id="myBookingSearch" placeholder="Search your bookings..." oninput="renderMyBookings()">
+                    </div>
+                    <button class="filter-btn active" onclick="setMyFilter('all', this)">All</button>
+                    <button class="filter-btn" onclick="setMyFilter('pending', this)">Pending</button>
+                    <button class="filter-btn" onclick="setMyFilter('approved', this)">Approved</button>
+                    <button class="filter-btn" onclick="setMyFilter('completed', this)">Completed</button>
+                </div>
+                <div id="myBookingsList"></div>
             </div>
         </div>
     </div>
@@ -988,12 +1070,25 @@
 
     <script>
         // Data Management
-        let services = JSON.parse(localStorage.getItem("midway_services")) || [];
-        let barbers = JSON.parse(localStorage.getItem("midway_barbers")) || [];
+        let services = JSON.parse(localStorage.getItem("midway_services")) || [
+            { name: "Classic Haircut", price: 250, duration: 30 },
+            { name: "Fade Cut", price: 300, duration: 45 },
+            { name: "Beard Trim", price: 150, duration: 20 },
+            { name: "Haircut + Beard", price: 350, duration: 60 },
+            { name: "Hot Towel Shave", price: 200, duration: 30 }
+        ];
+
+        let barbers = JSON.parse(localStorage.getItem("midway_barbers")) || [
+            { name: "Mike", off: ["Sunday"] },
+            { name: "John", off: ["Monday"] },
+            { name: "Carlos", off: ["Tuesday"] }
+        ];
+
         let bookings = JSON.parse(localStorage.getItem("midway_bookings")) || [];
         
         let currentRole = null;
         let currentFilter = 'all';
+        let myCurrentFilter = 'all';
         let pin = '';
         const ADMIN_PIN = '1234';
 
@@ -1100,14 +1195,15 @@
             renderAdminServices();
             renderAdminBarbers();
             renderAdminBookings();
+            renderCompleteBookingList();
             updateAdminStats();
             
             document.getElementById('adminServiceForm').onsubmit = (e) => {
                 e.preventDefault();
                 services.push({
                     name: document.getElementById('adminServiceName').value,
-                    price: document.getElementById('adminServicePrice').value,
-                    duration: document.getElementById('adminServiceDuration').value
+                    price: parseFloat(document.getElementById('adminServicePrice').value),
+                    duration: parseInt(document.getElementById('adminServiceDuration').value)
                 });
                 saveData();
                 renderAdminServices();
@@ -1133,11 +1229,7 @@
             document.getElementById('adminStatTotal').textContent = bookings.length;
             document.getElementById('adminStatApproved').textContent = bookings.filter(b => b.status === 'Approved').length;
             document.getElementById('adminStatPending').textContent = bookings.filter(b => b.status === 'Pending').length;
-            const revenue = bookings.filter(b => b.status === 'Approved').reduce((sum, b) => {
-                const s = services.find(sv => sv.name === b.service);
-                return sum + (s ? parseFloat(s.price) : 0);
-            }, 0);
-            document.getElementById('adminStatRevenue').textContent = '₱' + revenue.toLocaleString();
+            document.getElementById('adminStatCompleted').textContent = bookings.filter(b => b.status === 'Completed').length;
         }
 
         function renderAdminServices() {
@@ -1181,18 +1273,20 @@
             const container = document.getElementById('adminBookingList');
             const search = document.getElementById('adminSearch').value.toLowerCase();
             
+            // Show only non-completed bookings that need action
             let filtered = bookings.filter(b => {
+                if (b.status === 'Completed') return false;
                 if (currentFilter !== 'all' && b.status.toLowerCase() !== currentFilter) return false;
                 if (search && !b.clientName.toLowerCase().includes(search)) return false;
                 return true;
             });
 
             if (!filtered.length) {
-                container.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">📅</div><p>No bookings found</p></div>';
+                container.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">📅</div><p>No active bookings found</p></div>';
                 return;
             }
 
-            container.innerHTML = filtered.map((b, idx) => {
+            container.innerHTML = filtered.map((b) => {
                 const originalIdx = bookings.indexOf(b);
                 const service = services.find(s => s.name === b.service);
                 return `
@@ -1213,7 +1307,40 @@
                     <div class="booking-actions">
                         ${b.status !== 'Approved' ? `<button class="btn btn-success" onclick="updateStatus(${originalIdx}, 'Approved')">Approve</button>` : ''}
                         ${b.status !== 'Rejected' ? `<button class="btn btn-warning" onclick="updateStatus(${originalIdx}, 'Rejected')">Reject</button>` : ''}
-                        <button class="btn btn-secondary" onclick="deleteBooking(${originalIdx})">Delete</button>
+                        <button class="btn btn-info" onclick="completeBooking(${originalIdx})">Complete</button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // COMPLETE BOOKING LIST - Shows ALL bookings including completed (never disappears)
+        function renderCompleteBookingList() {
+            const container = document.getElementById('completeBookingList');
+            
+            if (!bookings.length) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><p>No bookings in the system</p></div>';
+                return;
+            }
+
+            // Sort by date (newest first)
+            const sortedBookings = [...bookings].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            container.innerHTML = sortedBookings.map((b) => {
+                const service = services.find(s => s.name === b.service);
+                const isCompleted = b.status === 'Completed';
+                
+                return `
+                <div class="booking-list-item ${b.status.toLowerCase()}">
+                    <div class="booking-list-info">
+                        <h4>👤 ${b.clientName}</h4>
+                        <p>💈 Service: ${b.service} ${service ? `(₱${parseFloat(service.price).toLocaleString()})` : ''}</p>
+                        <p>👨‍💼 Barber: ${b.barber} | 📅 ${new Date(b.date).toLocaleDateString()} at ${b.time}</p>
+                        ${b.createdAt ? `<p style="font-size: 0.8rem; opacity: 0.7;">Booked on: ${new Date(b.createdAt).toLocaleString()}</p>` : ''}
+                    </div>
+                    <div class="booking-list-meta">
+                        <span class="status-badge ${b.status.toLowerCase()}" style="margin-bottom: 0.5rem; display: inline-block;">${b.status}</span>
+                        <div class="booking-date">${isCompleted ? '✓ Completed' : '⏳ Active'}</div>
                     </div>
                 </div>
                 `;
@@ -1225,6 +1352,12 @@
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             renderAdminBookings();
+        }
+
+        function setHistoryFilter(type) {
+            // Toggle showing all or hiding completed
+            renderCompleteBookingList();
+            showToast('Showing all booking history');
         }
 
         function deleteService(i) {
@@ -1247,19 +1380,24 @@
 
         function updateStatus(i, status) {
             bookings[i].status = status;
+            bookings[i].updatedAt = new Date().toISOString();
             saveData();
             renderAdminBookings();
+            renderCompleteBookingList();
             updateAdminStats();
             showToast(`Booking ${status.toLowerCase()}`);
         }
 
-        function deleteBooking(i) {
-            if (confirm('Delete this booking permanently?')) {
-                bookings.splice(i, 1);
+        // COMPLETE BOOKING - Only way to remove from active list (but stays in history)
+        function completeBooking(i) {
+            if (confirm('Mark this booking as COMPLETED? It will be moved to completed history.')) {
+                bookings[i].status = 'Completed';
+                bookings[i].completedAt = new Date().toISOString();
                 saveData();
                 renderAdminBookings();
+                renderCompleteBookingList();
                 updateAdminStats();
-                showToast('Booking deleted');
+                showToast('Booking completed and archived');
             }
         }
 
@@ -1287,7 +1425,7 @@
 
             document.getElementById('customerBookingForm').onsubmit = (e) => {
                 e.preventDefault();
-                const name = document.getElementById('custName').value;
+                const name = document.getElementById('custName').value.trim();
                 const service = document.getElementById('custService').value;
                 const barber = document.getElementById('custBarber').value;
                 const date = document.getElementById('custDate').value;
@@ -1303,7 +1441,7 @@
                 }
 
                 const conflict = bookings.some(b => 
-                    b.barber === barber && b.date === date && b.time === time && b.status !== 'Rejected'
+                    b.barber === barber && b.date === date && b.time === time && !['Rejected', 'Completed'].includes(b.status)
                 );
 
                 if (conflict) {
@@ -1312,6 +1450,7 @@
                 }
 
                 bookings.push({
+                    id: Date.now().toString(),
                     clientName: name,
                     service,
                     barber,
@@ -1325,6 +1464,7 @@
                 renderMyBookings();
                 updateAdminStats();
                 e.target.reset();
+                document.getElementById('custName').value = name; // Keep name
                 showToast('Booking submitted successfully!');
             };
         }
@@ -1356,48 +1496,75 @@
                 barbers.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
         }
 
+        // MY BOOKING LIST - Customer sees all their bookings with name
         function renderMyBookings() {
             const container = document.getElementById('myBookingsList');
-            const customerName = document.getElementById('custName').value.toLowerCase();
+            const search = document.getElementById('myBookingSearch').value.toLowerCase();
+            const customerName = document.getElementById('custName').value.trim().toLowerCase();
             
-            // Get bookings for current session (by name match) or show recent
-            let myBookings = bookings.filter(b => 
-                b.clientName.toLowerCase() === customerName || 
-                !customerName
-            ).slice(-6).reverse(); // Show last 6
+            // Get bookings for this customer (by name match)
+            let myBookings = bookings.filter(b => {
+                // Match by name if entered, otherwise show all (for demo)
+                const nameMatch = !customerName || b.clientName.toLowerCase() === customerName;
+                const searchMatch = !search || 
+                    b.clientName.toLowerCase().includes(search) ||
+                    b.service.toLowerCase().includes(search) ||
+                    b.barber.toLowerCase().includes(search);
+                
+                // Apply status filter
+                const statusMatch = myCurrentFilter === 'all' || b.status.toLowerCase() === myCurrentFilter;
+                
+                return nameMatch && searchMatch && statusMatch;
+            });
+
+            // Sort by date (newest first)
+            myBookings.sort((a, b) => new Date(b.date) - new Date(a.date));
 
             if (!myBookings.length) {
-                container.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">📅</div><p>No bookings yet. Make your first appointment!</p></div>';
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <h3>No bookings found</h3>
+                        <p>${customerName ? 'You have no bookings. Make your first appointment!' : 'Enter your name above to see your bookings'}</p>
+                    </div>
+                `;
                 return;
             }
 
             container.innerHTML = myBookings.map(b => {
                 const service = services.find(s => s.name === b.service);
+                const isCompleted = b.status === 'Completed';
+                
                 return `
-                <div class="booking-card ${b.status.toLowerCase()}">
-                    <div class="booking-header">
-                        <div>
-                            <div class="client-name">${b.service}</div>
-                            <div style="color: #666; font-size: 0.9rem;">with ${b.barber}</div>
-                        </div>
-                        <span class="status-badge ${b.status.toLowerCase()}">${b.status}</span>
+                <div class="booking-list-item ${b.status.toLowerCase()}">
+                    <div class="booking-list-info">
+                        <h4>👤 ${b.clientName}</h4>
+                        <p>💈 ${b.service} with ${b.barber}</p>
+                        <p>📅 ${new Date(b.date).toLocaleDateString()} at ${b.time}</p>
+                        ${service ? `<p style="color: var(--accent-gold);">💰 ₱${parseFloat(service.price).toLocaleString()}</p>` : ''}
                     </div>
-                    <div class="booking-details">
-                        <span>📅 ${new Date(b.date).toLocaleDateString()}</span>
-                        <span>🕐 ${b.time}</span>
-                        ${service ? `<span style="color: var(--accent-gold);">💰 ₱${parseFloat(service.price).toLocaleString()}</span>` : ''}
+                    <div class="booking-list-meta">
+                        <span class="status-badge ${b.status.toLowerCase()}">${b.status}</span>
+                        <div class="booking-date">${isCompleted ? '✓ Done' : '⏳ Scheduled'}</div>
                     </div>
                 </div>
                 `;
             }).join('');
         }
 
+        function setMyFilter(status, btn) {
+            myCurrentFilter = status;
+            document.querySelectorAll('#myBookingsList').forEach(el => {
+                // Reset active state on buttons in customer panel
+                const buttons = el.parentElement.querySelectorAll('.filter-btn');
+                buttons.forEach(b => b.classList.remove('active'));
+            });
+            btn.classList.add('active');
+            renderMyBookings();
+        }
+
         // Update my bookings when name changes
-        document.getElementById('custName')?.addEventListener('input', () => {
-            if (document.getElementById('customerPanel').classList.contains('active')) {
-                renderMyBookings();
-            }
-        });
+        document.getElementById('custName')?.addEventListener('input', renderMyBookings);
     </script>
 </body>
 </html>
